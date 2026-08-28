@@ -1,1 +1,47 @@
 
+#include "stm32f10x.h"
+#include "usart.h"
+
+//硬件iic 
+//PB6 SCL
+//PB7 SDA
+//flash w25q64
+//usart TXD->PA10
+//usart RXD->PA9
+
+uint16_t i=0;
+uint16_t rx_len;
+#include "stm32f10x.h"
+
+int main(void)
+{
+NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);//中断优先级分组2
+	//初始化iic引脚
+RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+GPIO_InitTypeDef GPIO_InitStructure;
+GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
+GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+GPIO_Init(GPIOB, &GPIO_InitStructure);
+usart_init();
+	My_USART_Printf(USART1,"%d %c %x",0x30,0x30,0x30);
+  while(1)
+	{
+
+ 	 if(USART_Rx_Ptr.URxDataOut!=USART_Rx_Ptr.URxDataIn)	
+   {
+
+ 	 My_USART_Printf(USART1,"本次接收了%d字节数据\r\n",USART_Rx_Ptr.URxDataOut->end-USART_Rx_Ptr.URxDataOut->start+1);
+     for(i=0;i<USART_Rx_Ptr.URxDataOut->end-USART_Rx_Ptr.URxDataOut->start+1;i++) My_USART_Printf(USART1,"%c ",USART_Rx_Ptr.URxDataOut->start[i]);
+ 	 My_USART_Printf(USART1,"\r\n");
+      USART_Rx_Ptr.URxDataOut++;
+     if(USART_Rx_Ptr.URxDataOut == USART_Rx_Ptr.URxDataEnd)
+     {
+    USART_Rx_Ptr.URxDataOut=&USART_Rx_Ptr.URxData[0];
+     }
+		
+   }
+
+	}
+}
+
